@@ -1,197 +1,515 @@
-/*=============== SHOW MENU ===============*/
-const navMenu = document.getElementById('nav-menu');
-const navToggle = document.getElementById('nav-toggle');
-const navClose = document.getElementById('nav-close');
+/* =========================================
+   THE LAST FRONTIER
+   Cinematic JavaScript Experience
+========================================= */
 
-if(navToggle) {
-    navToggle.addEventListener('click', () => {
-        navMenu.classList.add('show-menu');
+document.addEventListener("DOMContentLoaded", () => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    // =====================================
+    // SELECTORS
+    // =====================================
+
+    const $ = (selector) => document.querySelector(selector);
+
+    const preloader = $("#preloader");
+    const progressBar = $(".preloader-progress-bar");
+    const counter = $(".preloader-counter");
+    const compassNeedle = $(".compass-needle");
+
+    const heroContent = $(".hero-content");
+    const heroBackground = $(".hero-background");
+    const heroLandscape = $(".hero-landscape");
+
+    const heroTitle = $(".hero-title");
+    const heroEyebrow = $(".hero-eyebrow");
+    const heroSubtitle = $(".hero-subtitle");
+    const heroCTA = $(".hero-cta");
+
+    const header = $(".header");
+    const chapter = $(".hero-chapter");
+    const coordinates = $(".hero-coordinates");
+    const scrollIndicator = $(".scroll-indicator");
+
+    const heroStamp = $(".hero-stamp");
+    const territoryStatus = $(".territory-status");
+
+    const menuToggle = $(".menu-toggle");
+    const mobileMenu = $(".mobile-menu");
+    const mobileMenuLinks = gsap.utils.toArray(".mobile-navigation a");
+
+    const atmosphereVideo = $(".atmosphere video");
+    const soundToggle = $(".sound-toggle");
+    const soundLabel = $(".sound-label");
+    const soundIcon = $(".sound-icon");
+
+    const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    // =====================================
+    // INITIAL STATE
+    // =====================================
+
+    gsap.set(
+        [
+            header,
+            heroEyebrow,
+            heroTitle,
+            heroSubtitle,
+            heroCTA,
+            chapter,
+            coordinates,
+            scrollIndicator,
+            heroStamp,
+            territoryStatus,
+        ],
+        {
+            autoAlpha: 0,
+        },
+    );
+
+    gsap.set(heroContent, {
+        y: 35,
     });
-}
 
-if(navClose) {
-    navClose.addEventListener('click', () => {
-        navMenu.classList.remove('show-menu');
+    gsap.set(".title-line", {
+        yPercent: 110,
     });
-}
-/*=============== REMOVE MENU MOBILE ===============*/
-const navLink = document.querySelectorAll('.nav__link');
 
-const linkAction = () => {
-    const navMenu = document.getElementById('nav-menu');
+    gsap.set(heroLandscape, {
+        scale: 1.15,
+    });
 
-    navMenu.classList.remove('show-menu');
-}
+    gsap.set([heroStamp, territoryStatus], {
+        y: 20,
+    });
 
-navLink.forEach(n => n.addEventListener('click', linkAction));
+    // =====================================
+    // 01. PRELOADER
+    // =====================================
 
-/*=============== SWIPER PROJECTS ===============*/
-let swiperProjects = new Swiper('.projects__container', {
-    loop: true,
-    spaceBetween: 24,
-    navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev",
-    },
-    pagination: {
-        el: ".swiper-pagination",
-    },
-    breakpoints: {
-        1200: {
-            slidesPerView: 2,
-            spaceBetween: -50,
-        }
+    function startPreloader() {
+        const loading = {
+            value: 0,
+        };
+
+        const duration = prefersReducedMotion ? 0.1 : 1.8;
+
+        const loadingTimeline = gsap.timeline({
+            onComplete: revealHero,
+        });
+
+        loadingTimeline
+            .to(
+                compassNeedle,
+                {
+                    rotation: 1080,
+                    duration,
+                    ease: "power2.inOut",
+                },
+                0,
+            )
+
+            .to(
+                loading,
+                {
+                    value: 100,
+                    duration,
+                    ease: "power2.inOut",
+
+                    onUpdate: () => {
+                        const percentage = Math.round(loading.value);
+
+                        if (counter) {
+                            counter.textContent = `${String(percentage).padStart(2, "0")}%`;
+                        }
+
+                        if (progressBar) {
+                            gsap.set(progressBar, {
+                                width: `${percentage}%`,
+                            });
+                        }
+                    },
+                },
+                0,
+            )
+
+            .to(
+                ".preloader-label",
+                {
+                    opacity: 0.35,
+                    duration: 0.5,
+                    yoyo: true,
+                    repeat: 1,
+                },
+                0,
+            );
     }
-});
 
-/*=============== SWIPER TESTIMONIAL ===============*/
-let swiperTestimonial = new Swiper('.testimonial__container', {
-    loop: true,
-    grabCursor: true,
-    navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev",
-    },
+    // =====================================
+    // CINEMATIC HERO REVEAL
+    // =====================================
 
-});
+    function revealHero() {
+        const intro = gsap.timeline({
+            defaults: {
+                ease: "power3.out",
+            },
+        });
 
-/*=============== EMAIL JS ===============*/
-const contactForm = document.getElementById('contact-form');
-const contactName = document.getElementById('contact-name');
-const contactEmail = document.getElementById('contact-email');
-const contactProject = document.getElementById('contact-project');
-const contactMessage = document.getElementById('contact-message');
-
-const sendEmail = (e) => {
-    e.preventDefault();
-
-    //check if field has a value
-    if(contactName.value === '' || contactEmail.value === '' || contactProject.value === '') {
-        //add or remove color
-        contactMessage.classList.remove('color-blue');
-        contactMessage.classList.add('color-red')
-
-        //show message
-        contactMessage.textContent = 'Write all fields please...';
-    }else{
-        //serviceID - templateID - #form - publicKey
-        emailjs.sendForm('service_lqpyxd1', 'template_ovajs56', '#contact-form', 'kk5oM2vPMYsBD367x')
-            .then(() => {
-                //show message and add color
-                contactMessage.classList.add('color-blue');
-                contactMessage.textContent = 'Message send success!';
-
-                //remove message after 5 sec
-                setTimeout(() => {
-                    contactMessage.textContent = '';
-                }, 5000)
-            }, (error) => {
-                alert('OOPS! Something has failed.. ' + error.message);
+        intro
+            .to(preloader, {
+                autoAlpha: 0,
+                duration: 0.8,
+                ease: "power2.inOut",
             })
 
-        //clear all fields
-        contactName.value = '';
-        contactEmail.value = '';
-        contactProject.value = '';
+            .to(
+                heroBackground,
+                {
+                    autoAlpha: 1,
+                    duration: 0.5,
+                },
+                "-=0.3",
+            )
+
+            .to(
+                heroLandscape,
+                {
+                    scale: 1,
+                    duration: 2.2,
+                    ease: "power2.out",
+                },
+                "-=0.5",
+            )
+
+            .to(
+                header,
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    duration: 1,
+                },
+                "-=1.2",
+            )
+
+            .to(
+                heroEyebrow,
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    duration: 0.8,
+                },
+                "-=0.8",
+            )
+
+            .to(
+                heroContent,
+                {
+                    y: 0,
+                    duration: 1.2,
+                    ease: "power3.out",
+                },
+                "-=1.2",
+            )
+
+            .to(heroTitle, {
+                autoAlpha: 1,
+                duration: 0.1,
+            })
+
+            .to(
+                ".title-line",
+                {
+                    yPercent: 0,
+                    duration: 1.3,
+                    stagger: 0.2,
+                    ease: "power4.out",
+                },
+                "-=0.1",
+            )
+
+            .to(
+                heroSubtitle,
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    duration: 0.8,
+                },
+                "-=0.65",
+            )
+
+            .to(
+                heroCTA,
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    duration: 0.8,
+                },
+                "-=0.5",
+            )
+
+            .to(
+                [chapter, coordinates],
+                {
+                    autoAlpha: 1,
+                    duration: 0.8,
+                    stagger: 0.15,
+                },
+                "-=0.4",
+            )
+
+            .to(
+                [heroStamp, territoryStatus],
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    duration: 0.9,
+                    stagger: 0.2,
+                    ease: "power3.out",
+                },
+                "-=0.5",
+            )
+
+            .to(
+                scrollIndicator,
+                {
+                    autoAlpha: 1,
+                    duration: 0.8,
+                },
+                "-=0.5",
+            );
     }
-}
 
-contactForm.addEventListener('submit', sendEmail);
+    gsap.to(".hero-background", {
+        scale: 1.015,
+        duration: 24,
+        ease: "power1.inOut",
+        yoyo: true,
+        repeat: -1,
+    });
 
-/*=============== SCROLL SECTIONS ACTIVE LINK ===============*/
-const sections = document.querySelectorAll('section[id]');
+    /* =========================================
+        JOURNAL NAVIGATION
+    ========================================= */
 
-const scrollActive = () => {
-    const scrollY = window.pageYOffset;
+    let menuOpen = false;
+    let menuTimeline = null;
 
-    sections.forEach(current => {
-        const sectionHeight = current.offsetHeight;
-        const sectionTop = current.offsetTop - 58;
-        const sectionId = current.getAttribute('id');
-        const sectionClass = document.querySelector('.nav__menu a[href*=' + sectionId + ']');
+    const menuItems = gsap.utils.toArray(".mobile-navigation a");
 
-        if(scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-            sectionClass.classList.add('active-link');
-        }else{
-            sectionClass.classList.remove('active-link');
+    function openMenu() {
+        if (menuOpen) return;
+
+        menuOpen = true;
+
+        menuToggle.classList.add("is-active");
+        menuToggle.setAttribute("aria-expanded", "true");
+        menuToggle.setAttribute("aria-label", "Close navigation");
+
+        mobileMenu.setAttribute("aria-hidden", "false");
+
+        document.body.classList.add("menu-open");
+
+        if (menuTimeline) {
+            menuTimeline.kill();
+        }
+
+        gsap.set(mobileMenu, {
+            visibility: "visible",
+            pointerEvents: "auto",
+        });
+
+        gsap.set(menuItems, {
+            autoAlpha: 0,
+            x: -35,
+        });
+
+        menuTimeline = gsap.timeline();
+
+        menuTimeline
+            .to(mobileMenu, {
+                clipPath: "inset(0% 0% 0% 0%)",
+                autoAlpha: 1,
+                duration: 0.85,
+                ease: "power4.inOut",
+            })
+
+            .fromTo(
+                ".mobile-menu-top",
+                {
+                    y: -15,
+                    autoAlpha: 0,
+                },
+                {
+                    y: 0,
+                    autoAlpha: 1,
+                    duration: 0.5,
+                },
+                "-=0.35",
+            )
+
+            .fromTo(
+                ".mobile-menu-heading",
+                {
+                    y: 20,
+                    autoAlpha: 0,
+                },
+                {
+                    y: 0,
+                    autoAlpha: 1,
+                    duration: 0.6,
+                },
+                "-=0.25",
+            )
+
+            .to(
+                menuItems,
+                {
+                    x: 0,
+                    autoAlpha: 1,
+                    duration: 0.7,
+                    stagger: 0.1,
+                    ease: "power3.out",
+                },
+                "-=0.3",
+            )
+
+            .fromTo(
+                ".mobile-menu-bottom",
+                {
+                    y: 15,
+                    autoAlpha: 0,
+                },
+                {
+                    y: 0,
+                    autoAlpha: 1,
+                    duration: 0.5,
+                },
+                "-=0.3",
+            );
+    }
+
+    function closeMenu() {
+        if (!menuOpen) return;
+
+        menuOpen = false;
+
+        menuToggle.classList.remove("is-active");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.setAttribute("aria-label", "Open navigation");
+
+        mobileMenu.setAttribute("aria-hidden", "true");
+
+        if (menuTimeline) {
+            menuTimeline.kill();
+        }
+
+        menuTimeline = gsap.timeline({
+            onComplete: () => {
+                gsap.set(mobileMenu, {
+                    visibility: "hidden",
+                    pointerEvents: "none",
+                });
+
+                document.body.classList.remove("menu-open");
+            },
+        });
+
+        menuTimeline
+            .to(menuItems, {
+                x: 25,
+                autoAlpha: 0,
+                duration: 0.25,
+                stagger: 0.035,
+                ease: "power2.in",
+            })
+
+            .to(
+                mobileMenu,
+                {
+                    clipPath: "inset(0% 0% 100% 0%)",
+                    autoAlpha: 0,
+                    duration: 0.7,
+                    ease: "power4.inOut",
+                },
+                "-=0.05",
+            );
+    }
+
+    // Toggle menu
+
+    menuToggle?.addEventListener("click", () => {
+        menuOpen ? closeMenu() : openMenu();
+    });
+
+    menuItems.forEach((link) => {
+        link.addEventListener("click", () => {
+            closeMenu();
+        });
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && menuOpen) {
+            closeMenu();
         }
     });
-}
 
-window.addEventListener('scroll', scrollActive);
+    /* =========================================
+        SOUND CONTROL
+    ========================================= */
 
-/*=============== SHOW SCROLL UP ===============*/ 
-const scrollUp = () => {
-    const scrollUP = document.getElementById('scroll-up');
-    this.scrollY >= 350 ? scrollUP.classList.add('show-scroll') : scrollUP.classList.remove('show-scroll');
-}
+    let soundEnabled = false;
 
-window.addEventListener('scroll', scrollUp);
+    function updateSoundButton() {
+        if (!soundToggle) return;
 
-/*=============== DARK LIGHT THEME ===============*/ 
-const themeButton = document.getElementById('theme-button');
-const darkTheme = 'dark-theme';
-const iconTheme = 'ri-sun-line';
+        soundToggle.classList.toggle("is-playing", soundEnabled);
 
-const selectedTheme = localStorage.getItem('selected-theme');
-const selectedIcon = localStorage.getItem('selected-icon');
+        soundToggle.setAttribute("aria-pressed", String(soundEnabled));
 
-const getCurrentTheme = () => document.body.classList.contains(darkTheme) ? 'dark' : 'light';
-const getCurrentIcon = () => document.body.classList.contains(iconTheme) ? 'ri-moon-line' : 'ri-sun-line';
+        soundToggle.setAttribute(
+            "aria-label",
+            soundEnabled ? "Turn sound off" : "Turn sound on",
+        );
 
-if(selectedTheme) {
-    document.body.classList[selectedTheme === 'dark' ? 'add' : 'remove'](darkTheme);
-    themeButton.classList[selectedIcon === 'ri-moon-line' ? 'add' : 'remove'](iconTheme);
-}
+        if (soundLabel) {
+            soundLabel.textContent = soundEnabled ? "SOUND ON" : "SOUND OFF";
+        }
 
-themeButton.addEventListener('click', () => {
-    document.body.classList.toggle(darkTheme);
-    themeButton.classList.toggle(iconTheme);
+        if (soundIcon) {
+            soundIcon.textContent = soundEnabled ? "♫" : "♪";
+        }
+    }
 
-    localStorage.setItem('selected-theme', getCurrentTheme());
-    localStorage.setItem('selected-icon', getCurrentIcon());
+    soundToggle?.addEventListener("click", async () => {
+        if (!atmosphereVideo) return;
+
+        soundEnabled = !soundEnabled;
+
+        atmosphereVideo.muted = !soundEnabled;
+
+        updateSoundButton();
+
+        if (soundEnabled) {
+            try {
+                await atmosphereVideo.play();
+            } catch (error) {
+                soundEnabled = false;
+                atmosphereVideo.muted = true;
+
+                updateSoundButton();
+
+                console.warn("Video playback unavailable:", error);
+            }
+        }
+    });
+
+    // =====================================
+    // INITIALIZE
+    // =====================================
+
+    updateSoundButton();
+    startPreloader();
 });
-
-/*=============== CHANGE BACKGROUND HEADER ===============*/
-const scrollHeader = () => {
-    const header = document.getElementById('header');
-
-    this.scrollY >= 50 ? header.classList.add('bg-header') : header.classList.remove('bg-header');
-}
-
-window.addEventListener('scroll', scrollHeader);
-
-/*=============== SCROLL REVEAL ANIMATION ===============*/
-const sr = ScrollReveal({
-    origin: 'top',
-    distance: '60px',
-    duration: 2500,
-    delay: 400,
-    //reset: true,
-});
-
-sr.reveal(`.home__data, .projects__container, .testimonial__container, .footer__container`);
-sr.reveal(`.home__info div`, {delay: 600, origin: 'bottom', interval: 100});
-sr.reveal(`.skills__content:nth-child(1), .contact__content:nth-child(1)`, {origin: 'left'});
-sr.reveal(`.skills__content:nth-child(2), .contact__content:nth-child(2)`, {origin: 'right'});
-sr.reveal(`.qualification__content, .services__card`, {interval: 100});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
